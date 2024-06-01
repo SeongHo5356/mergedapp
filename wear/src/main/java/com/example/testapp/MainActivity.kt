@@ -28,8 +28,10 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        binding.button1.setOnClickListener {
-            sendMessage("Button 1")
+        val button1 : Button = findViewById(R.id.button1)
+
+        button1.setOnClickListener {
+            sendMessage(button1.text.toString())
         }
         binding.button2.setOnClickListener {
             sendMessage("Button 2")

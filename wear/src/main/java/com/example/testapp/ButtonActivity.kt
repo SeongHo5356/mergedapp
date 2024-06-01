@@ -5,6 +5,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.testapp.R
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 
 class ButtonActivity :  ComponentActivity(){
 
@@ -23,10 +25,18 @@ class ButtonActivity :  ComponentActivity(){
             button.setOnClickListener(){
                 val buttonText = button.text.toString()
                 // 버튼을 눌렀을 때 할 행위 구현
-
+                sendMessage(buttonText)
                 Toast.makeText(this, buttonText, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun sendMessage(text: String) {
+        val putDataMapRequest = PutDataMapRequest.create("/button_text").apply {
+            dataMap.putString("button_text", text)
+        }
+        val putDataRequest = putDataMapRequest.asPutDataRequest().setUrgent()
+        Wearable.getDataClient(this).putDataItem(putDataRequest)
     }
 
 

@@ -12,11 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.wearable.*
 import com.example.testapp.databinding.ActivityMainBinding
-
+import android.app.Notification
 class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener {
 
     private lateinit var binding: ActivityMainBinding
-
+    private lateinit var myNotiReply: MyNotiListen2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -29,11 +29,22 @@ class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener {
             startActivity(intent)
         }
 
-        if(!isNotificationPermissionGranted()){
+        if(!isNotificationPermissionGranted()) {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
         Wearable.getDataClient(this).addListener(this)
+    }
+    private fun isNotificationPermissionGranted(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            return notificationManager.isNotificationListenerAccessGranted(
+                ComponentName(application, MyNotiListen2::class.java)
+            )
+        } else {
+            return NotificationManagerCompat.getEnabledListenerPackages(applicationContext)
+                .contains(applicationContext.packageName)
+        }
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -44,6 +55,8 @@ class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener {
                 runOnUiThread {
                     binding.textView.text = buttonText
                 }
+                myNotiReply = MyNotiListen2()
+                myNotiReply.logActiveNotifications("나도 답장")
             }
         }
     }
@@ -51,18 +64,5 @@ class MainActivity : AppCompatActivity(), DataClient.OnDataChangedListener {
     override fun onDestroy() {
         super.onDestroy()
         Wearable.getDataClient(this).removeListener(this)
-    }
-
-    private fun isNotificationPermissionGranted() : Boolean{
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1){
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            return notificationManager.isNotificationListenerAccessGranted(
-                ComponentName(application,
-                    MyNotificationListenerService::class.java)
-            )
-        }
-        else{
-            return NotificationManagerCompat.getEnabledListenerPackages(applicationContext).contains(applicationContext.packageName)
-        }
     }
 }
